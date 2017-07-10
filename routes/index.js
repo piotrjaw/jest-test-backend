@@ -67,6 +67,18 @@ router.delete('/todos', function (req, res, next) {
   });
 });
 
+router.delete('/todos/:_id', function (req, res, next) {
+  connectToDB(function (col, callback) {
+    col.deleteOne(
+      { _id: ObjectID(req.params._id) },
+      function (err, msg) {
+        res.send(msg);
+        callback();
+      }
+    );
+  });
+});
+
 router.put('/todos/:_id', function (req, res, next) {
   connectToDB(function (col, callback) {
     const updateObject = Object.assign(
