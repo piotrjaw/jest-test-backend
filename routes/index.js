@@ -19,30 +19,29 @@ router.get('/', function (req, res, next) {
   res.render('Home');
 });
 
-router.get('/todos', function (req, res, next) {
+router.get('/todos/', function (req, res, next) {
   connectToDB(function (col, callback) {
-    col.find({}).toArray(
-      function (err, docs) {
-        res.json(docs);
-        callback();
-      }
-    );
+    if (req.query._id) {
+      col.findOne(
+        { _id: ObjectID(req.query._id) },
+        function (err, doc) {
+          res.json(doc);
+          callback();
+        }
+      );
+    }
+    else {
+      col.find({}).toArray(
+        function (err, docs) {
+          res.json(docs);
+          callback();
+        }
+      );
+    }
   })
 });
 
-router.get('/todos/:_id', function (req, res, next) {
-  connectToDB(function (col, callback) {
-    col.findOne(
-      { _id: ObjectID(req.params._id) },
-      function (err, doc) {
-        res.json(doc);
-        callback();
-      }
-    );
-  });
-});
-
-router.post('/todos', function (req, res, next) {
+router.post('/todos/', function (req, res, next) {
   connectToDB(function (col, callback) {
     col.insertOne(
       {
@@ -55,31 +54,29 @@ router.post('/todos', function (req, res, next) {
   });
 });
 
-router.delete('/todos', function (req, res, next) {
+router.delete('/todos/', function (req, res, next) {
   connectToDB(function (col, callback) {
-    col.deleteMany(
-      {},
-      function (err, msg) {
-        res.send(msg);
-        callback();
-      }
-    );
+    if (req.query._id) {
+      col.deleteOne(
+        { _id: ObjectID(req.query._id) },
+        function (err, msg) {
+          res.send(msg);
+          callback();
+        }
+      );
+    } else {
+      col.deleteMany(
+        {},
+        function (err, msg) {
+          res.send(msg);
+          callback();
+        }
+      );
+    }
   });
 });
 
-router.delete('/todos/:_id', function (req, res, next) {
-  connectToDB(function (col, callback) {
-    col.deleteOne(
-      { _id: ObjectID(req.params._id) },
-      function (err, msg) {
-        res.send(msg);
-        callback();
-      }
-    );
-  });
-});
-
-router.put('/todos/:_id', function (req, res, next) {
+router.put('/todos/', function (req, res, next) {
   connectToDB(function (col, callback) {
     const updateObject = Object.assign(
       {},
@@ -87,7 +84,7 @@ router.put('/todos/:_id', function (req, res, next) {
       req.body.text ? { text: req.body.text } : {}
     );
     col.updateOne(
-      { _id: ObjectID(req.params._id) },
+      { _id: ObjectID(req.query._id) },
       { $set: updateObject },
       function (err, msg) {
         res.send(msg);
